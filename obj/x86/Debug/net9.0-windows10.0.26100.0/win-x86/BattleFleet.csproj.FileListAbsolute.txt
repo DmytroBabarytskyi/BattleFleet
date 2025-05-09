@@ -262,3 +262,4 @@ D:\Projects\BattleFleet\BattleFleet\obj\x86\Debug\net9.0-windows10.0.26100.0\win
 D:\Projects\BattleFleet\BattleFleet\obj\x86\Debug\net9.0-windows10.0.26100.0\win-x86\Views\StatsPage.xaml
 D:\Projects\BattleFleet\BattleFleet\obj\x86\Debug\net9.0-windows10.0.26100.0\win-x86\Views\StatsPage.xbf
 D:\Projects\BattleFleet\BattleFleet\bin\x86\Debug\net9.0-windows10.0.26100.0\win-x86\Views\StatsPage.xbf
+D:\Projects\BattleFleet\BattleFleet\obj\x86\Debug\net9.0-windows10.0.26100.0\win-x86\BattleFleet.sourcelink.json

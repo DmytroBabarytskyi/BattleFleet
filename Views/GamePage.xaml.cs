@@ -145,8 +145,8 @@ namespace BattleFleet
             }
 
             // Load shots
-            playerShots = gameState.PlayerShots;
-            computerShots = gameState.ComputerShots;
+            playerShots = new List<Point>(gameState.PlayerShots);
+            computerShots = new List<Point>(gameState.ComputerShots);
 
             // Set turn state
             isPlayerTurn = gameState.IsPlayerTurn;
@@ -156,86 +156,81 @@ namespace BattleFleet
             UpdatePlayerGrid();
             UpdateComputerGrid();
 
-            // Відновлюємо стан клітинок навколо знищених кораблів
+            // Відновлюємо стан клітинок для кораблів комп'ютера
             foreach (var ship in computerFleet)
             {
+                // Позначаємо всі влучання
+                foreach (var hit in ship.Hits)
+                {
+                    Button cell = GetButtonAtPoint(computerGrid, hit);
+                    if (cell != null)
+                    {
+                        StartLoopingAnimation(cell, hitFrames);
+                        cell.IsEnabled = false;
+                    }
+                }
+
+                // Якщо корабель потоплений, позначаємо клітинки навколо
                 if (ship.IsSunk)
                 {
-                    // Спочатку позначаємо всі клітинки корабля як влучання
-                    foreach (var coord in ship.Coordinates)
-                    {
-                        Button cell = GetButtonAtPoint(computerGrid, coord);
-                        if (cell != null)
-                        {
-                            StartLoopingAnimation(cell, hitFrames);
-                            cell.IsEnabled = false;
-                        }
-                    }
-                    // Потім позначаємо клітинки навколо
                     MarkSurroundingCells(ship.Coordinates, computerGrid);
                 }
             }
 
+            // Відновлюємо стан клітинок для кораблів гравця
             foreach (var ship in playerFleet)
             {
+                // Позначаємо всі влучання
+                foreach (var hit in ship.Hits)
+                {
+                    Button cell = GetButtonAtPoint(playerGrid, hit);
+                    if (cell != null)
+                    {
+                        StartLoopingAnimation(cell, hitFrames);
+                        cell.IsEnabled = false;
+                    }
+                }
+
+                // Якщо корабель потоплений, позначаємо клітинки навколо
                 if (ship.IsSunk)
                 {
-                    // Спочатку позначаємо всі клітинки корабля як влучання
-                    foreach (var coord in ship.Coordinates)
-                    {
-                        Button cell = GetButtonAtPoint(playerGrid, coord);
-                        if (cell != null)
-                        {
-                            StartLoopingAnimation(cell, hitFrames);
-                            cell.IsEnabled = false;
-                        }
-                    }
-                    // Потім позначаємо клітинки навколо
                     MarkSurroundingCells(ship.Coordinates, playerGrid);
                 }
             }
 
-            // Відновлюємо стан інших пострілів
+            // Відновлюємо стан промахів
             foreach (var shot in playerShots)
             {
-                Button cell = GetButtonAtPoint(computerGrid, shot);
-                if (cell != null)
+                if (!computerOccupied.Contains(shot))
                 {
-                    if (computerOccupied.Contains(shot))
-                    {
-                        StartLoopingAnimation(cell, hitFrames);
-                    }
-                    else
+                    Button cell = GetButtonAtPoint(computerGrid, shot);
+                    if (cell != null)
                     {
                         StartLoopingAnimation(cell, missFrames);
+                        cell.IsEnabled = false;
                     }
-                    cell.IsEnabled = false;
                 }
             }
 
             foreach (var shot in computerShots)
             {
-                Button cell = GetButtonAtPoint(playerGrid, shot);
-                if (cell != null)
+                if (!playerOccupied.Contains(shot))
                 {
-                    if (playerOccupied.Contains(shot))
-                    {
-                        StartLoopingAnimation(cell, hitFrames);
-                    }
-                    else
+                    Button cell = GetButtonAtPoint(playerGrid, shot);
+                    if (cell != null)
                     {
                         StartLoopingAnimation(cell, missFrames);
+                        cell.IsEnabled = false;
                     }
-                    cell.IsEnabled = false;
                 }
             }
 
-            // Enable/disable grids based on turn
+            // Enable/disable grids based on turn and shots
             foreach (var child in computerGrid.Children)
             {
                 if (child is Button button)
                 {
-                    button.IsEnabled = isPlayerTurn;
+                    button.IsEnabled = isPlayerTurn && !playerShots.Contains((Point)button.Tag);
                 }
             }
 
@@ -245,6 +240,17 @@ namespace BattleFleet
                 {
                     button.IsEnabled = false;
                 }
+            }
+
+            // If it's computer's turn, make it take its turn
+            if (!isPlayerTurn)
+            {
+                System.Diagnostics.Debug.WriteLine("Computer's turn after loading. Starting ComputerTurn...");
+                ComputerTurn();
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Player's turn after loading.");
             }
         }
 
@@ -931,12 +937,17 @@ namespace BattleFleet
 
         private async void ComputerTurn()
         {
+            System.Diagnostics.Debug.WriteLine("ComputerTurn started");
+            
             // Знаходимо всі доступні клітинки на полі гравця
             var availableButtons = playerGrid.Children.OfType<Button>()
-                .Where(b => b.IsEnabled).ToList();
+                .Where(b => !computerShots.Contains((Point)b.Tag)).ToList();
+
+            System.Diagnostics.Debug.WriteLine($"Available buttons: {availableButtons.Count}");
 
             if (availableButtons.Count == 0)
             {
+                System.Diagnostics.Debug.WriteLine("No available buttons, ending computer turn");
                 isPlayerTurn = true;
                 EnableComputerGrid();
                 return;
@@ -946,10 +957,14 @@ namespace BattleFleet
             var btn = availableButtons[rand.Next(availableButtons.Count)];
             var target = (Point)btn.Tag;
 
+            System.Diagnostics.Debug.WriteLine($"Computer shooting at ({target.X}, {target.Y})");
+
             btn.IsEnabled = false;
+            computerShots.Add(target);
 
             if (playerOccupied.Contains(target))
             {
+                System.Diagnostics.Debug.WriteLine("Computer hit!");
                 StartLoopingAnimation(btn, hitFrames);
 
                 var hitShip = playerFleet.FirstOrDefault(ship => ship.Coordinates.Contains(target));
@@ -959,6 +974,7 @@ namespace BattleFleet
 
                     if (hitShip.IsSunk)
                     {
+                        System.Diagnostics.Debug.WriteLine("Computer sunk a ship!");
                         // Оновлюємо всі клітинки корабля одночасно
                         foreach (var coord in hitShip.Coordinates)
                         {
@@ -976,6 +992,7 @@ namespace BattleFleet
 
                 if (playerFleet.All(ship => ship.IsSunk))
                 {
+                    System.Diagnostics.Debug.WriteLine("All player ships sunk, game over!");
                     currentState = PlacementState.Placing;
                     PlayerLost?.Invoke();
                     return;
@@ -986,8 +1003,8 @@ namespace BattleFleet
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine("Computer missed");
                 StartLoopingAnimation(btn, missFrames);
-                computerShots.Add(target);
                 isPlayerTurn = true;
                 EnableComputerGrid();
             }

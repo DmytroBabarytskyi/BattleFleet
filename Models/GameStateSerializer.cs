@@ -56,7 +56,7 @@ namespace BattleFleet.Models
         public Ship ToShip()
         {
             var coords = Coordinates.ConvertAll(p => p.ToPoint());
-            return Type switch
+            Ship ship = Type switch
             {
                 "SingleDeckShip" => new SingleDeckShip(coords, IsHorizontal),
                 "DoubleDeckShip" => new DoubleDeckShip(coords, IsHorizontal),
@@ -64,6 +64,14 @@ namespace BattleFleet.Models
                 "QuadDeckShip" => new QuadDeckShip(coords, IsHorizontal),
                 _ => throw new ArgumentException($"Unknown ship type: {Type}")
             };
+
+            // Відновлюємо стан влучань
+            foreach (var hit in Hits)
+            {
+                ship.RegisterHit(hit.ToPoint());
+            }
+
+            return ship;
         }
     }
 
@@ -120,6 +128,22 @@ namespace BattleFleet.Models
                 gameState.LastSaved = DateTime.Now;
                 var serializableState = new SerializableGameState(gameState);
                 
+                // Логуємо стан перед збереженням
+                System.Diagnostics.Debug.WriteLine("=== SAVING GAME STATE ===");
+                System.Diagnostics.Debug.WriteLine($"Player Ships: {gameState.PlayerShips.Count}");
+                foreach (var ship in gameState.PlayerShips)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Player Ship: Hits={ship.Hits.Count}, IsSunk={ship.IsSunk}");
+                }
+                System.Diagnostics.Debug.WriteLine($"Computer Ships: {gameState.ComputerShips.Count}");
+                foreach (var ship in gameState.ComputerShips)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Computer Ship: Hits={ship.Hits.Count}, IsSunk={ship.IsSunk}");
+                }
+                System.Diagnostics.Debug.WriteLine($"Player Shots: {gameState.PlayerShots.Count}");
+                System.Diagnostics.Debug.WriteLine($"Computer Shots: {gameState.ComputerShots.Count}");
+                System.Diagnostics.Debug.WriteLine($"Is Player Turn: {gameState.IsPlayerTurn}");
+                
                 var serializer = new DataContractJsonSerializer(typeof(SerializableGameState));
                 using (var stream = new MemoryStream())
                 {
@@ -152,7 +176,25 @@ namespace BattleFleet.Models
                 using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonString)))
                 {
                     var serializableState = (SerializableGameState)serializer.ReadObject(stream);
-                    return serializableState.ToGameState();
+                    var gameState = serializableState.ToGameState();
+
+                    // Логуємо стан після завантаження
+                    System.Diagnostics.Debug.WriteLine("=== LOADING GAME STATE ===");
+                    System.Diagnostics.Debug.WriteLine($"Player Ships: {gameState.PlayerShips.Count}");
+                    foreach (var ship in gameState.PlayerShips)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Player Ship: Hits={ship.Hits.Count}, IsSunk={ship.IsSunk}");
+                    }
+                    System.Diagnostics.Debug.WriteLine($"Computer Ships: {gameState.ComputerShips.Count}");
+                    foreach (var ship in gameState.ComputerShips)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Computer Ship: Hits={ship.Hits.Count}, IsSunk={ship.IsSunk}");
+                    }
+                    System.Diagnostics.Debug.WriteLine($"Player Shots: {gameState.PlayerShots.Count}");
+                    System.Diagnostics.Debug.WriteLine($"Computer Shots: {gameState.ComputerShots.Count}");
+                    System.Diagnostics.Debug.WriteLine($"Is Player Turn: {gameState.IsPlayerTurn}");
+
+                    return gameState;
                 }
             }
             catch (FileNotFoundException)

@@ -49,6 +49,7 @@ namespace BattleFleet.Models
             {
                 HitPoints.Add(hit);
                 Hits.Add(hit);
+                System.Diagnostics.Debug.WriteLine($"Registering hit at ({hit.X}, {hit.Y}) for ship of size {Size}. Total hits: {Hits.Count}");
             }
         }
 
@@ -57,7 +58,7 @@ namespace BattleFleet.Models
         {
             if (IsSunk)
             {
-                // Додаткові дії, якщо корабель потоплений, наприклад, зміна вигляду
+                System.Diagnostics.Debug.WriteLine($"Ship of size {Size} is sunk! Total hits: {Hits.Count}");
             }
         }
     }
