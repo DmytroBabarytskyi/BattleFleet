@@ -13,12 +13,12 @@
                     Content="Нова гра"
                                                
                     Style="{StaticResource MenuButtonStyle}"/>
-            
+
             <Button x:ConnectionId='3' x:Name="LoadGameButton" 
                     Content="Завантажити гру"
                                                 
                     Style="{StaticResource MenuButtonStyle}"/>
-            
+
             <Button x:ConnectionId='4' x:Name="StatsButton" 
                     Content="Статистика"
                                              

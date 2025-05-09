@@ -13,12 +13,12 @@
                     Content="Нова гра"
                     Click="NewGameButton_Click"
                     Style="{StaticResource MenuButtonStyle}"/>
-            
+
             <Button x:Name="LoadGameButton" 
                     Content="Завантажити гру"
                     Click="LoadGameButton_Click"
                     Style="{StaticResource MenuButtonStyle}"/>
-            
+
             <Button x:Name="StatsButton" 
                     Content="Статистика"
                     Click="StatsButton_Click"

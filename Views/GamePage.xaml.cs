@@ -1189,5 +1189,25 @@ namespace BattleFleet
                 Frame.Navigate(typeof(GamePage));
             }
         }
+
+        private void BackToMainButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Перевіряємо, чи гра в процесі
+            if (currentState == PlacementState.Ready)
+            {
+                // Показуємо діалог підтвердження
+                var dialog = new MessageDialog("Ви впевнені, що хочете вийти? Прогрес гри буде втрачено.", "Підтвердження");
+                dialog.Commands.Add(new UICommand("Так", command => Frame.Navigate(typeof(MainPage))));
+                dialog.Commands.Add(new UICommand("Ні"));
+                dialog.DefaultCommandIndex = 1;
+                dialog.CancelCommandIndex = 1;
+                dialog.ShowAsync();
+            }
+            else
+            {
+                // Якщо гра ще не почалась, просто переходимо на головну
+                Frame.Navigate(typeof(MainPage));
+            }
+        }
     }
 }
