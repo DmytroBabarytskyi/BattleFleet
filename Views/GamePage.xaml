@@ -1,0 +1,67 @@
+﻿<Page
+    x:Class="BattleFleet.GamePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BattleFleet"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Text="Морський бій" FontSize="24" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+
+        <!-- Save button - now much more prominent -->
+        <Button Grid.Row="1" x:Name="SaveGameButton" Content="Зберегти гру" Click="SaveGameButton_Click" 
+                Visibility="Visible" Width="200" Height="50" Margin="10,0,0,0" 
+                Padding="10,5"
+                Background="White" Foreground="Black" FontSize="20" FontWeight="Bold"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                BorderThickness="2" BorderBrush="Black" Opacity="0.3"/>
+
+        <!-- Main content -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Placement controls -->
+            <StackPanel x:Name="PlacementControls" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <ComboBox x:Name="ShipSelector" Width="120" Margin="0,0,10,0" SelectionChanged="ShipSelector_SelectionChanged">
+                    <ComboBoxItem Tag="4">4-палубний</ComboBoxItem>
+                    <ComboBoxItem Tag="3">3-палубний</ComboBoxItem>
+                    <ComboBoxItem Tag="2">2-палубний</ComboBoxItem>
+                    <ComboBoxItem Tag="1">1-палубний</ComboBoxItem>
+                </ComboBox>
+                <Button x:Name="SetHorizontalButton" Content="Горизонтально" Click="SetHorizontal_Click" Margin="0,0,10,0"/>
+                <Button x:Name="SetVerticalButton" Content="Вертикально" Click="SetVertical_Click" Margin="0,0,10,0"/>
+                <Button x:Name="FinishPlacementButton" Content="Готово" Click="FinishPlacement_Click"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="40">
+                    <!-- Поле гравця -->
+                    <StackPanel>
+                        <TextBlock Text="Ваше поле" FontSize="20" HorizontalAlignment="Center"/>
+                        <Grid x:Name="PlayerGrid" Width="500" Height="500">
+                            <Image x:Name="PlayerOceanBackground" Stretch="UniformToFill" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Поле комп'ютера -->
+                    <StackPanel>
+                        <TextBlock Text="Поле противника" FontSize="20" HorizontalAlignment="Center"/>
+                        <Grid x:Name="ComputerGrid" Width="500" Height="500">
+                            <Image x:Name="ComputerOceanBackground" Stretch="UniformToFill" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>

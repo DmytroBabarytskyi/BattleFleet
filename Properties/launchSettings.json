@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "BattleFleet": {
+      "commandName": "MsixPackage"
+    }
+  }
+}

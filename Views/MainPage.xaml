@@ -1,0 +1,33 @@
+﻿<Page
+    x:Class="BattleFleet.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BattleFleet"
+    Background="LightBlue">
+
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+            <TextBlock Text="Морський бій" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
+
+            <Button x:Name="NewGameButton" 
+                    Content="Нова гра"
+                    Click="NewGameButton_Click"
+                    Style="{StaticResource MenuButtonStyle}"/>
+            
+            <Button x:Name="LoadGameButton" 
+                    Content="Завантажити гру"
+                    Click="LoadGameButton_Click"
+                    Style="{StaticResource MenuButtonStyle}"/>
+            
+            <Button x:Name="StatsButton" 
+                    Content="Статистика"
+                    Click="StatsButton_Click"
+                    Style="{StaticResource MenuButtonStyle}"/>
+            
+            <Button x:Name="ExitButton" 
+                    Content="Вихід"
+                    Click="ExitButton_Click"
+                    Style="{StaticResource MenuButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</Page>

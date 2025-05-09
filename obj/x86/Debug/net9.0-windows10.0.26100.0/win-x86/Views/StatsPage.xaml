@@ -1,0 +1,104 @@
+﻿<Page
+    x:Class="BattleFleet.Views.StatsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BattleFleet"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:ConnectionId='12' x:Name="TopBackButton" 
+                        Content="Назад"
+                                                
+                        Margin="0,0,20,0"/>
+
+                <TextBlock Text="Вхід в акаунт" 
+                          Style="{ThemeResource HeaderTextBlockStyle}"
+                          Grid.Column="1"
+                          HorizontalAlignment="Center"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock x:ConnectionId='13' x:Name="LoginStatusText" 
+                             Text="Не ввійшли в систему"
+                             VerticalAlignment="Center"
+                             Margin="0,0,10,0"/>
+                    <Button x:ConnectionId='14' x:Name="LogoutButton"
+                            Content="Вийти"
+                                                      
+                            Visibility="Collapsed"/>
+                </StackPanel>
+            </Grid>
+            
+            <TextBox x:ConnectionId='10' x:Name="PlayerNameTextBox" 
+                     Header="Ім'я гравця"
+                     PlaceholderText="Введіть ваше ім'я"
+                     Margin="0,20,0,10"/>
+            
+            <Button x:ConnectionId='11' x:Name="LoginButton" 
+                    Content="Увійти"
+                                             
+                    HorizontalAlignment="Stretch"/>
+        </StackPanel>
+
+        <StackPanel x:ConnectionId='2' Grid.Row="1" Margin="20" x:Name="StatsPanel" Visibility="Collapsed">
+            <TextBlock Text="Статистика" 
+                       Style="{ThemeResource HeaderTextBlockStyle}"
+                       Margin="0,0,0,20"/>
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Ім'я гравця:" Grid.Row="0" Grid.Column="0"/>
+                <TextBlock x:ConnectionId='4' x:Name="PlayerNameText" Grid.Row="0" Grid.Column="1"/>
+
+                <TextBlock Text="Виграно ігор:" Grid.Row="1" Grid.Column="0"/>
+                <TextBlock x:ConnectionId='5' x:Name="GamesWonText" Grid.Row="1" Grid.Column="1"/>
+
+                <TextBlock Text="Програно ігор:" Grid.Row="2" Grid.Column="0"/>
+                <TextBlock x:ConnectionId='6' x:Name="GamesLostText" Grid.Row="2" Grid.Column="1"/>
+
+                <TextBlock Text="Відсоток перемог:" Grid.Row="3" Grid.Column="0"/>
+                <TextBlock x:ConnectionId='7' x:Name="WinRateText" Grid.Row="3" Grid.Column="1"/>
+
+                <TextBlock Text="Знищено кораблів:" Grid.Row="4" Grid.Column="0"/>
+                <TextBlock x:ConnectionId='8' x:Name="ShipsDestroyedText" Grid.Row="4" Grid.Column="1"/>
+
+                <TextBlock Text="Втрачено кораблів:" Grid.Row="5" Grid.Column="0"/>
+                <TextBlock x:ConnectionId='9' x:Name="ShipsLostText" Grid.Row="5" Grid.Column="1"/>
+            </Grid>
+
+            <Button x:ConnectionId='3' x:Name="BackButton" 
+                    Content="Назад"
+                                            
+                    HorizontalAlignment="Stretch"
+                    Margin="0,20,0,0"/>
+        </StackPanel>
+    </Grid>
+</Page> 
+
