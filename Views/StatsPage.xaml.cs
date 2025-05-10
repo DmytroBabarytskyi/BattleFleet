@@ -170,6 +170,7 @@ namespace BattleFleet.Views
             WinRateText.Text = $"{stats.WinRate}%";
             ShipsDestroyedText.Text = stats.ShipsDestroyed.ToString();
             ShipsLostText.Text = stats.ShipsLost.ToString();
+            LastPlayedText.Text = stats.LastPlayed.ToString("dd.MM.yyyy HH:mm");
 
             // Зберігаємо інформацію про поточного гравця
             CurrentPlayer.Login(stats);

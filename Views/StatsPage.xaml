@@ -68,6 +68,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -91,6 +92,9 @@
 
                 <TextBlock Text="Втрачено кораблів:" Grid.Row="5" Grid.Column="0"/>
                 <TextBlock x:Name="ShipsLostText" Grid.Row="5" Grid.Column="1"/>
+
+                <TextBlock Text="Остання гра:" Grid.Row="6" Grid.Column="0"/>
+                <TextBlock x:Name="LastPlayedText" Grid.Row="6" Grid.Column="1"/>
             </Grid>
 
             <Button x:Name="BackButton" 
