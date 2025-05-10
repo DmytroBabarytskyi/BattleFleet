@@ -1254,28 +1254,6 @@ namespace BattleFleet
             return true;
         }
 
-        private void UpdatePotentialTargets()
-        {
-            potentialTargets.Clear();
-            
-            // Додаємо всі клітинки, які ще не були обстріляні
-            for (int x = 0; x < 10; x++)
-            {
-                for (int y = 0; y < 10; y++)
-                {
-                    var point = new Point(x, y);
-                    if (!computerShots.Contains(point))
-                    {
-                        potentialTargets.Add(point);
-                    }
-                }
-            }
-
-            // Перемішуємо список для випадкового вибору
-            Random rand = new Random();
-            potentialTargets = potentialTargets.OrderBy(x => rand.Next()).ToList();
-        }
-
         private void EnableComputerGrid()
         {
             foreach (var child in computerGrid.Children)
