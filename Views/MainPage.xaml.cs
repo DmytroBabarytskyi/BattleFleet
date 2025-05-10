@@ -30,7 +30,7 @@ namespace BattleFleet
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(GamePage));
+            Frame.Navigate(typeof(DifficultySelectionPage));
         }
 
         private async void LoadGameButton_Click(object sender, RoutedEventArgs e)

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="BattleFleet.Views.DifficultySelectionPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BattleFleet"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Виберіть складність"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   HorizontalAlignment="Center"
+                   Margin="0,50,0,30"/>
+
+        <StackPanel Grid.Row="1" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center"
+                    Spacing="20">
+            
+            <Button x:Name="EasyButton"
+                    Content="Легка"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Width="200"
+                    Height="60"
+                    Click="EasyButton_Click">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel Margin="10">
+                            <TextBlock Text="Комп'ютер стріляє випадковим чином"
+                                     TextWrapping="Wrap"
+                                     Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+
+            <Button x:Name="HardButton"
+                    Content="Важка"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Width="200"
+                    Height="60"
+                    Click="HardButton_Click">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel Margin="10">
+                            <TextBlock Text="Комп'ютер використовує стратегію пошуку та знищення кораблів"
+                                     TextWrapping="Wrap"
+                                     Margin="0,0,0,10"/>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
+
+        <Button x:Name="BackButton"
+                Content="Назад"
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,30"
+                Click="BackButton_Click"/>
+    </Grid>
+</Page> 

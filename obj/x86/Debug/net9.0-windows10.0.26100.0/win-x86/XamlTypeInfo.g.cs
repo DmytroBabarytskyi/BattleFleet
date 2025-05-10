@@ -199,21 +199,23 @@ namespace BattleFleet.BattleFleet_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[6];
-            _typeNameTable[0] = "BattleFleet.GamePage";
+            _typeNameTable = new string[7];
+            _typeNameTable[0] = "BattleFleet.Views.DifficultySelectionPage";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[3] = "BattleFleet.MainPage";
-            _typeNameTable[4] = "BattleFleet.Views.StatsPage";
-            _typeNameTable[5] = "Windows.UI.Xaml.Controls.TreeViewNode";
+            _typeNameTable[3] = "BattleFleet.GamePage";
+            _typeNameTable[4] = "BattleFleet.MainPage";
+            _typeNameTable[5] = "BattleFleet.Views.StatsPage";
+            _typeNameTable[6] = "Windows.UI.Xaml.Controls.TreeViewNode";
 
-            _typeTable = new global::System.Type[6];
-            _typeTable[0] = typeof(global::BattleFleet.GamePage);
+            _typeTable = new global::System.Type[7];
+            _typeTable[0] = typeof(global::BattleFleet.Views.DifficultySelectionPage);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[3] = typeof(global::BattleFleet.MainPage);
-            _typeTable[4] = typeof(global::BattleFleet.Views.StatsPage);
-            _typeTable[5] = typeof(global::Windows.UI.Xaml.Controls.TreeViewNode);
+            _typeTable[3] = typeof(global::BattleFleet.GamePage);
+            _typeTable[4] = typeof(global::BattleFleet.MainPage);
+            _typeTable[5] = typeof(global::BattleFleet.Views.StatsPage);
+            _typeTable[6] = typeof(global::Windows.UI.Xaml.Controls.TreeViewNode);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -248,9 +250,10 @@ namespace BattleFleet.BattleFleet_XamlTypeInfo
             return -1;
         }
 
-        private object Activate_0_GamePage() { return new global::BattleFleet.GamePage(); }
-        private object Activate_3_MainPage() { return new global::BattleFleet.MainPage(); }
-        private object Activate_4_StatsPage() { return new global::BattleFleet.Views.StatsPage(); }
+        private object Activate_0_DifficultySelectionPage() { return new global::BattleFleet.Views.DifficultySelectionPage(); }
+        private object Activate_3_GamePage() { return new global::BattleFleet.GamePage(); }
+        private object Activate_4_MainPage() { return new global::BattleFleet.MainPage(); }
+        private object Activate_5_StatsPage() { return new global::BattleFleet.Views.StatsPage(); }
 
 
 
@@ -264,9 +267,9 @@ namespace BattleFleet.BattleFleet_XamlTypeInfo
             switch (typeIndex)
             {
 
-            case 0:   //  BattleFleet.GamePage
+            case 0:   //  BattleFleet.Views.DifficultySelectionPage
                 userType = new global::BattleFleet.BattleFleet_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_0_GamePage;
+                userType.Activator = Activate_0_DifficultySelectionPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -279,21 +282,28 @@ namespace BattleFleet.BattleFleet_XamlTypeInfo
                 xamlType = new global::BattleFleet.BattleFleet_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 3:   //  BattleFleet.MainPage
+            case 3:   //  BattleFleet.GamePage
                 userType = new global::BattleFleet.BattleFleet_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_3_MainPage;
+                userType.Activator = Activate_3_GamePage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 4:   //  BattleFleet.Views.StatsPage
+            case 4:   //  BattleFleet.MainPage
                 userType = new global::BattleFleet.BattleFleet_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_4_StatsPage;
+                userType.Activator = Activate_4_MainPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 5:   //  Windows.UI.Xaml.Controls.TreeViewNode
+            case 5:   //  BattleFleet.Views.StatsPage
+                userType = new global::BattleFleet.BattleFleet_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_5_StatsPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 6:   //  Windows.UI.Xaml.Controls.TreeViewNode
                 xamlType = new global::BattleFleet.BattleFleet_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
             }

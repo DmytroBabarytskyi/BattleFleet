@@ -1,5 +1,6 @@
 ﻿// GamePage.xaml.cs
 using BattleFleet.Models;
+using BattleFleet.Views;
 using BattleFleet.Logic;
 using System;
 using System.Collections.Generic;
@@ -62,6 +63,15 @@ namespace BattleFleet
         private List<Point> playerShots = new List<Point>();
         private List<Point> computerShots = new List<Point>();
 
+        private Difficulty currentDifficulty;
+        private List<Point> potentialTargets = new List<Point>();
+        private Point? lastHit = null;
+        private bool isHunting = false;
+        private bool? isHorizontalShip = null;
+        private List<Point> currentShipHits = new List<Point>();
+        private Point? shootingDirection = null;
+        private bool isDestroyingShip = false; // Флаг, що показує чи комп'ютер зараз знищує корабель
+
         public GamePage()
         {
             this.InitializeComponent();
@@ -97,11 +107,14 @@ namespace BattleFleet
                 SetVerticalButton.Visibility = Visibility.Collapsed;
                 FinishPlacementButton.Visibility = Visibility.Collapsed;
             }
-            else
+            else if (e.Parameter is Difficulty difficulty)
             {
                 // Ініціалізуємо computerFleet для нової гри
                 computerFleet = new List<Ship>();
                 computerOccupied = new HashSet<Point>();
+                
+                // Set difficulty
+                currentDifficulty = difficulty;
                 
                 // Start new game
                 GenerateComputerFleet();
@@ -111,6 +124,11 @@ namespace BattleFleet
                 SetHorizontalButton.Visibility = Visibility.Visible;
                 SetVerticalButton.Visibility = Visibility.Visible;
                 FinishPlacementButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Якщо немає параметрів, повертаємось на екран вибору складності
+                Frame.Navigate(typeof(DifficultySelectionPage));
             }
         }
 
@@ -163,12 +181,12 @@ namespace BattleFleet
                 foreach (var hit in ship.Hits)
                 {
                     Button cell = GetButtonAtPoint(computerGrid, hit);
-                    if (cell != null)
-                    {
-                        StartLoopingAnimation(cell, hitFrames);
-                        cell.IsEnabled = false;
+                        if (cell != null)
+                        {
+                            StartLoopingAnimation(cell, hitFrames);
+                            cell.IsEnabled = false;
+                        }
                     }
-                }
 
                 // Якщо корабель потоплений, позначаємо клітинки навколо
                 if (ship.IsSunk)
@@ -184,12 +202,12 @@ namespace BattleFleet
                 foreach (var hit in ship.Hits)
                 {
                     Button cell = GetButtonAtPoint(playerGrid, hit);
-                    if (cell != null)
-                    {
-                        StartLoopingAnimation(cell, hitFrames);
-                        cell.IsEnabled = false;
+                        if (cell != null)
+                        {
+                            StartLoopingAnimation(cell, hitFrames);
+                            cell.IsEnabled = false;
+                        }
                     }
-                }
 
                 // Якщо корабель потоплений, позначаємо клітинки навколо
                 if (ship.IsSunk)
@@ -202,12 +220,12 @@ namespace BattleFleet
             foreach (var shot in playerShots)
             {
                 if (!computerOccupied.Contains(shot))
-                {
-                    Button cell = GetButtonAtPoint(computerGrid, shot);
-                    if (cell != null)
+            {
+                Button cell = GetButtonAtPoint(computerGrid, shot);
+                if (cell != null)
                     {
                         StartLoopingAnimation(cell, missFrames);
-                        cell.IsEnabled = false;
+                    cell.IsEnabled = false;
                     }
                 }
             }
@@ -215,12 +233,12 @@ namespace BattleFleet
             foreach (var shot in computerShots)
             {
                 if (!playerOccupied.Contains(shot))
-                {
-                    Button cell = GetButtonAtPoint(playerGrid, shot);
-                    if (cell != null)
+            {
+                Button cell = GetButtonAtPoint(playerGrid, shot);
+                if (cell != null)
                     {
                         StartLoopingAnimation(cell, missFrames);
-                        cell.IsEnabled = false;
+                    cell.IsEnabled = false;
                     }
                 }
             }
@@ -504,9 +522,6 @@ namespace BattleFleet
             frameTimer.Tick += (s, e) =>
             {
                 if (oceanFrames.Count == 0) return;
-
-                PlayerOceanBackground.Source = oceanFrames[currentFrame];
-                ComputerOceanBackground.Source = oceanFrames[currentFrame];
 
                 foreach (var entry in buttonFrameIndex.ToList())
                 {
@@ -879,7 +894,7 @@ namespace BattleFleet
                                         cell.IsEnabled = false;
                                     }
                                 }
-                                MarkSurroundingCells(hitShip.Coordinates, computerGrid);
+                                MarkSurroundingCells(hitShip.Coordinates, computerGrid); 
                             }
                         }
 
@@ -939,43 +954,150 @@ namespace BattleFleet
         {
             System.Diagnostics.Debug.WriteLine("ComputerTurn started");
             
-            // Знаходимо всі доступні клітинки на полі гравця
-            var availableButtons = playerGrid.Children.OfType<Button>()
+            if (currentDifficulty == Difficulty.Easy)
+            {
+                await EasyComputerTurn();
+            }
+            else
+            {
+                await HardComputerTurn();
+            }
+        }
+
+        private async Task EasyComputerTurn()
+            {
+                // Знаходимо всі доступні клітинки на полі гравця
+                var availableButtons = playerGrid.Children.OfType<Button>()
                 .Where(b => !computerShots.Contains((Point)b.Tag)).ToList();
 
             System.Diagnostics.Debug.WriteLine($"Available buttons: {availableButtons.Count}");
 
-            if (availableButtons.Count == 0)
-            {
+                if (availableButtons.Count == 0)
+                {
                 System.Diagnostics.Debug.WriteLine("No available buttons, ending computer turn");
-                isPlayerTurn = true;
-                EnableComputerGrid();
-                return;
-            }
+                    isPlayerTurn = true;
+                    EnableComputerGrid();
+                    return;
+                }
 
             Random rand = new Random();
-            var btn = availableButtons[rand.Next(availableButtons.Count)];
-            var target = (Point)btn.Tag;
+                var btn = availableButtons[rand.Next(availableButtons.Count)];
+            await ProcessComputerShot(btn);
+        }
 
+        private async Task HardComputerTurn()
+        {
+            System.Diagnostics.Debug.WriteLine("Hard mode computer turn");
+            
+            // Якщо комп'ютер зараз знищує корабель, продовжуємо в цьому напрямку
+            if (isDestroyingShip && lastHit.HasValue)
+            {
+                // Спочатку пробуємо в поточному напрямку
+                var nextTarget = FindNextTarget(lastHit.Value);
+                if (nextTarget != null)
+                {
+                    var targetButton = GetButtonAtPoint(playerGrid, nextTarget.Value);
+                    if (targetButton != null)
+                    {
+                        await ProcessComputerShot(targetButton);
+                        return;
+                    }
+                }
+                
+                // Якщо не знайшли ціль в поточному напрямку, пробуємо протилежний
+                if (shootingDirection.HasValue)
+                {
+                    var oppositeDirection = new Point(-shootingDirection.Value.X, -shootingDirection.Value.Y);
+                    var oppositePoint = new Point(lastHit.Value.X + oppositeDirection.X, lastHit.Value.Y + oppositeDirection.Y);
+                    
+                    if (IsValidTarget(oppositePoint))
+                    {
+                        var targetButton = GetButtonAtPoint(playerGrid, oppositePoint);
+                        if (targetButton != null)
+                        {
+                            shootingDirection = oppositeDirection;
+                            await ProcessComputerShot(targetButton);
+                            return;
+                        }
+                    }
+                }
+                
+                // Якщо не знайшли ціль в обох напрямках, перевіряємо всі сусідні клітинки
+                var surroundingPoints = GetSurroundingPoints(lastHit.Value);
+                foreach (var point in surroundingPoints)
+                {
+                    if (IsValidTarget(point))
+                    {
+                        var targetButton = GetButtonAtPoint(playerGrid, point);
+                        if (targetButton != null)
+                        {
+                            await ProcessComputerShot(targetButton);
+                            return;
+                        }
+                    }
+                }
+                
+                // Якщо не знайшли жодної цілі, скидаємо стан і переходимо до випадкового пошуку
+                isDestroyingShip = false;
+                lastHit = null;
+                isHorizontalShip = null;
+                currentShipHits.Clear();
+                shootingDirection = null;
+            }
+            
+            // Режим пошуку - вибираємо ціль з потенційних цілей
+            if (potentialTargets.Count > 0)
+            {
+                var target = potentialTargets[0];
+                potentialTargets.RemoveAt(0);
+                var targetButton = GetButtonAtPoint(playerGrid, target);
+                if (targetButton != null)
+                {
+                    await ProcessComputerShot(targetButton);
+                    return;
+                }
+            }
+
+            // Якщо немає потенційних цілей, вибираємо випадкову клітинку
+            var availableButtons = playerGrid.Children.OfType<Button>()
+                .Where(b => !computerShots.Contains((Point)b.Tag)).ToList();
+
+            if (availableButtons.Count > 0)
+            {
+                Random rand = new Random();
+                var targetButton = availableButtons[rand.Next(availableButtons.Count)];
+                await ProcessComputerShot(targetButton);
+            }
+            else
+            {
+                isPlayerTurn = true;
+                EnableComputerGrid();
+            }
+        }
+
+        private async Task ProcessComputerShot(Button btn)
+        {
+            var target = (Point)btn.Tag;
             System.Diagnostics.Debug.WriteLine($"Computer shooting at ({target.X}, {target.Y})");
 
-            btn.IsEnabled = false;
+                btn.IsEnabled = false;
             computerShots.Add(target);
 
             if (playerOccupied.Contains(target))
-            {
+                {
                 System.Diagnostics.Debug.WriteLine("Computer hit!");
-                StartLoopingAnimation(btn, hitFrames);
+                    StartLoopingAnimation(btn, hitFrames);
 
                 var hitShip = playerFleet.FirstOrDefault(ship => ship.Coordinates.Contains(target));
-                if (hitShip != null)
-                {
-                    hitShip.RegisterHit(target);
-
-                    if (hitShip.IsSunk)
+                    if (hitShip != null)
                     {
+                    hitShip.RegisterHit(target);
+                    currentShipHits.Add(target);
+                    isDestroyingShip = true;
+
+                        if (hitShip.IsSunk)
+                        {
                         System.Diagnostics.Debug.WriteLine("Computer sunk a ship!");
-                        // Оновлюємо всі клітинки корабля одночасно
                         foreach (var coord in hitShip.Coordinates)
                         {
                             var cell = GetButtonAtPoint(playerGrid, coord);
@@ -985,29 +1107,173 @@ namespace BattleFleet
                                 cell.IsEnabled = false;
                             }
                         }
-                        MarkSurroundingCells(hitShip.Coordinates, playerGrid);
+                            MarkSurroundingCells(hitShip.Coordinates, playerGrid);
                         ShowMessage("Комп'ютер потопив ваш корабель!");
+                        
+                        // Скидаємо всі стани тільки після повного знищення корабля
+                        isDestroyingShip = false;
+                        isHunting = false;
+                        lastHit = null;
+                        isHorizontalShip = null;
+                        currentShipHits.Clear();
+                        shootingDirection = null;
+                    }
+                    else
+                    {
+                        if (!lastHit.HasValue)
+                        {
+                            // Перше влучання
+                            isHunting = true;
+                            lastHit = target;
+                        }
+                        else if (currentShipHits.Count == 2)
+                        {
+                            // Друге влучання - визначаємо орієнтацію і напрямок
+                            var firstHit = currentShipHits[0];
+                            var secondHit = currentShipHits[1];
+                            
+                            if (firstHit.X == secondHit.X)
+                            {
+                                isHorizontalShip = false; // Вертикальний корабель
+                                shootingDirection = new Point(0, secondHit.Y > firstHit.Y ? 1 : -1);
+                            }
+                            else if (firstHit.Y == secondHit.Y)
+                            {
+                                isHorizontalShip = true; // Горизонтальний корабель
+                                shootingDirection = new Point(secondHit.X > firstHit.X ? 1 : -1, 0);
+                            }
+                        }
                     }
                 }
 
-                if (playerFleet.All(ship => ship.IsSunk))
-                {
+                    if (playerFleet.All(ship => ship.IsSunk))
+                    {
                     System.Diagnostics.Debug.WriteLine("All player ships sunk, game over!");
-                    currentState = PlacementState.Placing;
+                        currentState = PlacementState.Placing;
                     PlayerLost?.Invoke();
-                    return;
-                }
+                        return;
+                    }
 
-                // Якщо влучив - ходить ще раз
                 ComputerTurn();
+                }
+                else
+                {
+                System.Diagnostics.Debug.WriteLine("Computer missed");
+                    StartLoopingAnimation(btn, missFrames);
+                
+                // Якщо промахнулись і знаємо напрямок, пробуємо протилежний напрямок
+                if (shootingDirection.HasValue)
+                {
+                    var oppositeDirection = new Point(-shootingDirection.Value.X, -shootingDirection.Value.Y);
+                    var oppositePoint = new Point(lastHit.Value.X + oppositeDirection.X, lastHit.Value.Y + oppositeDirection.Y);
+                    
+                    if (IsValidTarget(oppositePoint))
+                    {
+                        var targetButton = GetButtonAtPoint(playerGrid, oppositePoint);
+                        if (targetButton != null)
+                        {
+                            shootingDirection = oppositeDirection;
+                            ComputerTurn();
+                            return;
+            }
+                    }
+                }
+                
+            isPlayerTurn = true;
+            EnableComputerGrid();
+            }
+        }
+
+        private Point? FindNextTarget(Point lastHit)
+        {
+            // Якщо знаємо напрямок стрільби, продовжуємо в цьому напрямку
+            if (shootingDirection.HasValue)
+            {
+                var nextPoint = new Point(
+                    lastHit.X + shootingDirection.Value.X,
+                    lastHit.Y + shootingDirection.Value.Y
+                );
+                
+                if (IsValidTarget(nextPoint))
+                {
+                    return nextPoint;
+                }
+                return null;
+            }
+
+            // Якщо знаємо орієнтацію корабля, перевіряємо відповідні напрямки
+            if (isHorizontalShip.HasValue)
+            {
+                var directions = isHorizontalShip.Value
+                    ? new[] { new Point(-1, 0), new Point(1, 0) }  // Тільки горизонтальні напрямки
+                    : new[] { new Point(0, -1), new Point(0, 1) }; // Тільки вертикальні напрямки
+
+                foreach (var dir in directions)
+                {
+                    var nextPoint = new Point(lastHit.X + dir.X, lastHit.Y + dir.Y);
+                    if (IsValidTarget(nextPoint))
+                    {
+                        return nextPoint;
+                    }
+                }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Computer missed");
-                StartLoopingAnimation(btn, missFrames);
-                isPlayerTurn = true;
-                EnableComputerGrid();
+                // Якщо не знаємо орієнтацію, перевіряємо всі напрямки
+                var directions = new[]
+                {
+                    new Point(-1, 0), // вліво
+                    new Point(1, 0),  // вправо
+                    new Point(0, -1), // вгору
+                    new Point(0, 1)   // вниз
+                };
+
+                foreach (var dir in directions)
+                {
+                    var nextPoint = new Point(lastHit.X + dir.X, lastHit.Y + dir.Y);
+                    if (IsValidTarget(nextPoint))
+                    {
+                        return nextPoint;
+                    }
+                }
             }
+
+            return null;
+        }
+
+        private bool IsValidTarget(Point point)
+        {
+            // Перевіряємо, чи точка в межах поля
+            if (point.X < 0 || point.X >= 10 || point.Y < 0 || point.Y >= 10)
+                return false;
+
+            // Перевіряємо, чи в цю точку ще не стріляли
+            if (computerShots.Contains(point))
+                return false;
+
+            return true;
+        }
+
+        private void UpdatePotentialTargets()
+        {
+            potentialTargets.Clear();
+            
+            // Додаємо всі клітинки, які ще не були обстріляні
+            for (int x = 0; x < 10; x++)
+            {
+                for (int y = 0; y < 10; y++)
+                {
+                    var point = new Point(x, y);
+                    if (!computerShots.Contains(point))
+                    {
+                        potentialTargets.Add(point);
+                    }
+                }
+            }
+
+            // Перемішуємо список для випадкового вибору
+            Random rand = new Random();
+            potentialTargets = potentialTargets.OrderBy(x => rand.Next()).ToList();
         }
 
         private void EnableComputerGrid()
@@ -1211,3 +1477,4 @@ namespace BattleFleet
         }
     }
 }
+
