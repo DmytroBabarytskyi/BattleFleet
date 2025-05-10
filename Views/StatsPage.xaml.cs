@@ -1,4 +1,5 @@
 using BattleFleet.Models;
+using BattleFleet.Services;
 using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -8,18 +9,28 @@ using System.Data;
 using MySql.Data.MySqlClient;
 using System.Text.Json;
 using Windows.Storage;
+using System.Collections.Generic;
+using Windows.UI.Xaml.Navigation;
 
 namespace BattleFleet.Views
 {
     public sealed partial class StatsPage : Page
     {
         private readonly string connectionString;
+        private List<PlayerRanking> leaderboard;
 
         public StatsPage()
         {
             this.InitializeComponent();
             connectionString = LoadConnectionString();
+            leaderboard = new List<PlayerRanking>();
             UpdateLoginStatus();
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            LoadLeaderboard();
         }
 
         private void UpdateLoginStatus()
@@ -161,6 +172,59 @@ namespace BattleFleet.Views
             return null;
         }
 
+        private async void LoadLeaderboard()
+        {
+            try
+            {
+                var databaseService = new DatabaseService(connectionString);
+                var topPlayers = await databaseService.GetTopPlayersAsync(10);
+                
+                LeaderboardListView.Items.Clear();
+                int rank = 1;
+                foreach (var player in topPlayers)
+                {
+                    var grid = new Grid();
+                    grid.Margin = new Thickness(0, 5, 0, 5);
+                    
+                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0, GridUnitType.Auto) });
+                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0, GridUnitType.Auto) });
+
+                    var rankText = new TextBlock
+                    {
+                        Text = rank++.ToString(),
+                        Style = (Style)Application.Current.Resources["BodyTextBlockStyle"],
+                        Margin = new Thickness(0, 0, 10, 0)
+                    };
+                    Grid.SetColumn(rankText, 0);
+
+                    var nameText = new TextBlock
+                    {
+                        Text = player.PlayerName,
+                        Style = (Style)Application.Current.Resources["BodyTextBlockStyle"]
+                    };
+                    Grid.SetColumn(nameText, 1);
+
+                    var winsText = new TextBlock
+                    {
+                        Text = player.GamesWon.ToString(),
+                        Style = (Style)Application.Current.Resources["BodyTextBlockStyle"]
+                    };
+                    Grid.SetColumn(winsText, 2);
+
+                    grid.Children.Add(rankText);
+                    grid.Children.Add(nameText);
+                    grid.Children.Add(winsText);
+
+                    LeaderboardListView.Items.Add(grid);
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowMessage($"Помилка при завантаженні таблиці лідерів: {ex.Message}");
+            }
+        }
+
         private void DisplayStats(PlayerStats stats)
         {
             StatsPanel.Visibility = Visibility.Visible;
@@ -175,6 +239,9 @@ namespace BattleFleet.Views
             // Зберігаємо інформацію про поточного гравця
             CurrentPlayer.Login(stats);
             UpdateLoginStatus();
+            
+            // Оновлюємо таблицю лідерів
+            LoadLeaderboard();
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -194,5 +261,12 @@ namespace BattleFleet.Views
             var dialog = new MessageDialog(message);
             await dialog.ShowAsync();
         }
+    }
+
+    public class PlayerRanking
+    {
+        public int Rank { get; set; }
+        public string PlayerName { get; set; }
+        public int GamesWon { get; set; }
     }
 } 
